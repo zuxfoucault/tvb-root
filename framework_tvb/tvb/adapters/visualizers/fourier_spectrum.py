@@ -70,7 +70,7 @@ class FourierSpectrumDisplay(ABCDisplayer):
         self.log.debug("Plot started...")
         input_data = kwargs['input_data']
         shape = list(input_data.read_data_shape())
-        state_list = input_data.source.labels_dimensions.get(input_data.source.labels_ordering[1], [])
+        state_list = input_data.source.state_list
         mode_list = range(shape[3])
         available_scales = ["Linear", "Logarithmic"]
 

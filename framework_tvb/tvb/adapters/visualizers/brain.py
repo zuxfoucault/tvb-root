@@ -52,7 +52,6 @@ from tvb.datatypes.time_series import TimeSeries, TimeSeriesSurface, TimeSeriesS
 MAX_MEASURE_POINTS_LENGTH = 600
 
 
-
 class BrainViewer(ABCDisplayer):
     """
     Interface between the 3D view of the Brain Cortical Surface and TVB framework.
@@ -61,7 +60,6 @@ class BrainViewer(ABCDisplayer):
     """
     _ui_name = "Brain Activity Visualizer"
     PAGE_SIZE = 500
-
 
     def get_input_tree(self):
         return [{'name': 'time_series', 'label': 'Time Series (Region or Surface)',
@@ -74,7 +72,6 @@ class BrainViewer(ABCDisplayer):
                 {'name': 'shell_surface', 'label': 'Shell Surface', 'type': Surface, 'required': False,
                  'description': "Surface to be displayed semi-transparently, for visual purposes only."}]
 
-
     def get_required_memory_size(self, time_series, shell_surface=None):
         """
         Assume one page doesn't get 'dumped' in time and it is highly probably that
@@ -83,7 +80,6 @@ class BrainViewer(ABCDisplayer):
         overall_shape = time_series.read_data_shape()
         used_shape = (overall_shape[0] / (self.PAGE_SIZE * 2.0), overall_shape[1], overall_shape[2], overall_shape[3])
         return numpy.prod(used_shape) * 8.0
-
 
     def generate_preview(self, time_series, shell_surface=None, figure_size=None):
         """
@@ -116,14 +112,12 @@ class BrainViewer(ABCDisplayer):
 
         return self.build_display_result("brain/portlet_preview", params)
 
-
     def launch(self, time_series, shell_surface=None):
         """
         Build visualizer's page.
         """
         params = self.compute_parameters(time_series, shell_surface)
         return self.build_display_result("brain/view", params, pages=dict(controlPage="brain/controls"))
-
 
     def populate_surface_fields(self, time_series):
         """
@@ -147,7 +141,6 @@ class BrainViewer(ABCDisplayer):
             self.region_map = time_series.region_mapping
             self.surface = self.region_map.surface
 
-
     def retrieve_measure_points_prams(self, time_series):
         """
         To be overwritten method, for retrieving the measurement points (region centers, EEG sensors).
@@ -165,7 +158,6 @@ class BrainViewer(ABCDisplayer):
         return {'urlMeasurePoints': measure_points,
                 'urlMeasurePointsLabels': measure_points_labels,
                 'noOfMeasurePoints': self.measure_points_no}
-
 
     def compute_parameters(self, time_series, shell_surface=None):
         """
@@ -192,7 +184,7 @@ class BrainViewer(ABCDisplayer):
         legend_labels = self._compute_legend_labels(min_val, max_val)
 
         data_shape = time_series.read_data_shape()
-        state_variables = time_series.labels_dimensions.get(time_series.labels_ordering[1], [])
+        state_variables = time_series.state_list
 
         if self.surface and self.region_map:
             boundary_url = self.surface.get_url_for_region_boundaries(self.region_map)
@@ -217,7 +209,6 @@ class BrainViewer(ABCDisplayer):
 
         return params
 
-
     @staticmethod
     def _prepare_mappings(mappings_dict):
         """
@@ -237,7 +228,6 @@ class BrainViewer(ABCDisplayer):
                         this_mappings.append(index)
             prepared_mappings.append(this_mappings)
         return prepared_mappings
-
 
     @staticmethod
     def _compute_legend_labels(min_val, max_val, nr_labels=5, min_nr_dec=3):
@@ -269,7 +259,6 @@ class BrainViewer(ABCDisplayer):
         inter_values = [round(processed_min_val + value_diff * i, idx) for i in range(nr_labels, 0, -1)]
         return [processed_max_val] + inter_values + [processed_min_val]
 
-
     def _prepare_data_slices(self, time_series):
         """
         Prepare data URL for retrieval with slices of timeSeries activity and Time-Line.
@@ -284,14 +273,12 @@ class BrainViewer(ABCDisplayer):
         return activity_base_url, time_urls
 
 
-
 class DualBrainViewer(BrainViewer):
     """
     Visualizer merging Brain 3D display and EEG lines display.
     """
     _ui_name = "Brain Activity Viewer in 3D and 2D"
     _ui_subsection = "brain_dual"
-
 
     def get_input_tree(self):
 
@@ -309,7 +296,6 @@ class DualBrainViewer(BrainViewer):
                 {'name': 'shell_surface', 'label': 'Shell Surface', 'type': Surface, 'required': False,
                  'description': "Wrapping surface over the internal sensors, to be displayed "
                                 "semi-transparently, for visual purposes only."}]
-
 
     def populate_surface_fields(self, time_series):
         """
@@ -330,7 +316,6 @@ class DualBrainViewer(BrainViewer):
                 raise Exception("No EEG Cap Surface found for display!")
             self.surface = eeg_cap[0]
 
-
     def retrieve_measure_points_prams(self, time_series):
 
         if isinstance(time_series, TimeSeriesRegion):
@@ -343,7 +328,6 @@ class DualBrainViewer(BrainViewer):
                                                                    time_series.sensors, self.surface)
 
         return prepare_sensors_as_measure_points_params(time_series.sensors)
-
 
     def launch(self, time_series, projection_surface=None, shell_surface=None):
 
@@ -367,4 +351,3 @@ class DualBrainViewer(BrainViewer):
         return self.build_display_result("brain/extendedview", params,
                                          pages=dict(controlPage="brain/extendedcontrols",
                                                     channelsPage="commons/channel_selector.html"))
-

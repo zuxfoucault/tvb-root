@@ -41,13 +41,11 @@ from tvb.basic.filters.chain import FilterChain
 from tvb.core.adapters.abcdisplayer import ABCDisplayer
 
 
-
 class TimeSeries(ABCDisplayer):
     _ui_name = "Time Series Visualizer (SVG/d3)"
     _ui_subsection = "timeseries"
 
     MAX_PREVIEW_DATA_LENGTH = 200
-
 
     def get_input_tree(self):
         """
@@ -61,11 +59,9 @@ class TimeSeries(ABCDisplayer):
                                            operations=["!="], values=["TimeSeriesVolume"])
                  }]
 
-
     def get_required_memory_size(self, **kwargs):
         """Return required memory."""
         return -1
-
 
     def launch(self, time_series, preview=False, figsize=None):
         """Construct data for visualization and launch it."""
@@ -77,7 +73,7 @@ class TimeSeries(ABCDisplayer):
         if preview and shape[0] > self.MAX_PREVIEW_DATA_LENGTH:
             shape[0] = self.MAX_PREVIEW_DATA_LENGTH
 
-        state_variables = time_series.labels_dimensions.get(time_series.labels_ordering[1], [])
+        state_variables = time_series.state_list
         labels = time_series.get_space_labels()
 
         # when surface-result, the labels will be empty, so fill some of them,
@@ -96,7 +92,6 @@ class TimeSeries(ABCDisplayer):
         pars.update(self.build_template_params_for_subselectable_datatype(time_series))
 
         return self.build_display_result("time_series/view", pars, pages=dict(controlPage="time_series/control"))
-
 
     def generate_preview(self, time_series, figure_size):
         return self.launch(time_series, preview=True, figsize=figure_size)

@@ -127,6 +127,14 @@ class TimeSeries(types_mapped.MappedType):
         for i in range(min(self.nr_dimensions, 4)):
             setattr(self, 'length_%dd' % (i + 1), int(data_shape[i]))
 
+    @property
+    def state_list(self):
+        return self.labels_dimensions.get(self.labels_ordering[1], ["0"])
+
+    @property
+    def mode_list(self):
+        return self.length_4d
+
     def read_data_shape(self):
         """
         Expose shape read on field data.
@@ -323,7 +331,6 @@ class SensorsTSBase(TimeSeries):
 
     """
     __tablename__ = None
-
 
     def get_space_labels(self):
         """

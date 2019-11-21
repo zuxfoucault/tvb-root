@@ -43,7 +43,6 @@ class PearsonEdgeBundle(ABCDisplayer):
     _ui_name = "Pearson Edge Bundle"
     _ui_subsection = "correlation_pearson_edge"
 
-
     def get_input_tree(self):
         """ Inform caller of the data we need as input """
 
@@ -52,13 +51,11 @@ class PearsonEdgeBundle(ABCDisplayer):
                  "label": "Pearson Correlation to be displayed in a hierarchical edge bundle",
                  "required": True}]
 
-
     def get_required_memory_size(self, datatype):
         """Return required memory."""
 
         input_size = datatype.read_data_shape()
         return numpy.prod(input_size) * 8.0
-
 
     def launch(self, datatype):
         """Construct data for visualization and launch it."""
@@ -67,8 +64,8 @@ class PearsonEdgeBundle(ABCDisplayer):
         parent_ts = datatype.source
         parent_ts = self.load_entity_by_gid(parent_ts.gid)
         labels = parent_ts.get_space_labels()
-        state_list = parent_ts.labels_dimensions.get(parent_ts.labels_ordering[1], [])
-        mode_list = range(parent_ts._length_4d)
+        state_list = parent_ts.state_list
+        mode_list = range(parent_ts.mode_list)
         if not labels:
             labels = None
         pars = dict(matrix_labels=json.dumps(labels),

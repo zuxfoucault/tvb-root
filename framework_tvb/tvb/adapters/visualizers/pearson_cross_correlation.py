@@ -67,8 +67,8 @@ class PearsonCorrelationCoefficientVisualizer(MappedArrayVisualizer):
         parent_ts = datatype.source
         parent_ts = self.load_entity_by_gid(parent_ts.gid)
         labels = parent_ts.get_space_labels()
-        state_list = datatype.source.labels_dimensions.get(datatype.source.labels_ordering[1], [])
-        mode_list = range(datatype.source._length_4d)
+        state_list = parent_ts.state_list
+        mode_list = range(parent_ts.mode_list)
         if not labels:
             labels = None
         pars = dict(matrix_labels=json.dumps([labels, labels]),
