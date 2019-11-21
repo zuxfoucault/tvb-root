@@ -57,14 +57,12 @@ Conversion of power of 2 sample-rates(Hz) to Monitor periods(ms)
 import numpy
 from tvb.datatypes.time_series import (TimeSeries, TimeSeriesRegion,
     TimeSeriesEEG, TimeSeriesMEG, TimeSeriesSEEG, TimeSeriesSurface)
-from tvb.simulator.common import get_logger, simple_gen_astr
+from tvb.simulator.common import get_logger
 from tvb.simulator import noise
 import tvb.datatypes.sensors as sensors_module
-from tvb.datatypes.sensors import SensorsMEG, SensorsInternal, SensorsEEG, Sensors
+from tvb.datatypes.sensors import SensorsEEG
 import tvb.datatypes.arrays as arrays
-from tvb.datatypes.cortex import Cortex
 from tvb.datatypes.region_mapping import RegionMapping
-from tvb.datatypes.connectivity import Connectivity
 from tvb.datatypes.projections import (ProjectionMatrix,
     ProjectionSurfaceEEG, ProjectionSurfaceMEG, ProjectionSurfaceSEEG)
 import tvb.datatypes.equations as equations
@@ -306,7 +304,6 @@ class SpatialAverage(Monitor):
         self.spatial_mean = spatial_sum / nodes_per_area
         util.log_debug_array(LOG, self.spatial_mean, "spatial_mean", owner=self.__class__.__name__)
 
-
     def sample(self, step, state):
         if step % self.istep == 0:
             time = step * self.dt
@@ -369,7 +366,6 @@ class TemporalAverage(Monitor):
         LOG.debug("Temporal average stock_size is %s" % (str(stock_size), ))
         self._stock = numpy.zeros(stock_size)
 
-
     def sample(self, step, state):
         """
         Records if integration step corresponds to sampling period, Otherwise
@@ -395,12 +391,12 @@ class Projection(Monitor):
             " connectivity. For iEEG/EEG/MEG monitors, this must be specified when performing a region"
             " simulation but is optional for a surface simulation.")
 
-    obsnoise = noise.Noise(
-        label = "Observation Noise",
-        default = noise.Additive,
-        required = False,
-        doc = """The monitor's noise source. It incorporates its
-        own instance of Numpy's RandomState.""")
+    # obsnoise = noise.Noise(
+    #     label = "Observation Noise",
+    #     default = noise.Additive,
+    #     required = False,
+    #     doc = """The monitor's noise source. It incorporates its
+    #     own instance of Numpy's RandomState.""")
 
     @staticmethod
     def oriented_gain(gain, orient):
@@ -452,13 +448,15 @@ class Projection(Monitor):
 
         # handle observation noise and configure white/coloured noise
         # pass in access to the: i) dt and ii) sample shape
-        if self.obsnoise is not None:
-            # configure the noise level
-            if self.obsnoise.ntau > 0.0:
-                noiseshape = self.sensors.labels[:,numpy.newaxis].shape
-                self.obsnoise.configure_coloured(dt=self.dt, shape=noiseshape)
-            else:
-                self.obsnoise.configure_white(dt=self.dt)
+
+        # TODO: THE PRESENCE OF OBSNOISE WILL CAUSE ERRORS AT SIMULATION LAUNCH, IT NEEDS TO BE TESTED
+        # if self.obsnoise is not None:
+        #     # configure the noise level
+        #     if self.obsnoise.ntau > 0.0:
+        #         noiseshape = self.sensors.labels[:,numpy.newaxis].shape
+        #         self.obsnoise.configure_coloured(dt=self.dt, shape=noiseshape)
+        #     else:
+        #         self.obsnoise.configure_white(dt=self.dt)
 
         # handle region vs simulation, analytic vs numerical proj, cortical vs subcortical.
         # setup convenient locals
@@ -533,8 +531,8 @@ class Projection(Monitor):
             sample = self._state.copy() / self._period_in_steps
 
             # add observation noise if available
-            if self.obsnoise is not None:
-                sample += self.obsnoise.generate(shape=sample.shape)
+            # if self.obsnoise is not None:
+            #     sample += self.obsnoise.generate(shape=sample.shape)
 
             self._state[:] = 0.0
             return time, sample.T[..., numpy.newaxis] # for compatibility
@@ -867,7 +865,6 @@ class Bold(Monitor):
         self._stock = numpy.zeros((self._stock_steps,) + sample_shape)
         LOG.debug("BOLD outer buffer %s %.2f MB" % (
             self._stock.shape, self._stock.nbytes/2**20))
-
 
     def sample(self, step, state):
         # Update the interim-stock at every step
