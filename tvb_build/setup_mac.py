@@ -31,21 +31,21 @@
 """
 Create TVB distribution package for Mac OS.
 
-Execute in root SVN:
+Execute in root:
 
-    python tvb_build/setup_mac.py py2app
+    python tvb_build/setup_mac.py
 
 """
 
 import os
-import sys
 import shutil
-import setuptools
 import locale
 import importlib
 import tvb_bin
 from glob import glob
 from zipfile import ZipFile, ZIP_DEFLATED
+
+from conda_env_to_app import create_app
 from tvb.basic.profile import TvbProfile
 from tvb.basic.config.environment import Environment
 from tvb_build.third_party_licenses.build_licenses import generate_artefact
@@ -64,39 +64,7 @@ FOLDERS_TO_DELETE = ['.svn', '.project', '.settings']
 FILES_TO_DELETE = ['.DS_Store', 'dev_logger_config.conf']
 EXCLUDED_DYNAMIC_LIBS = []
 
-# Modules to be copied manually into "packages" locations, as they are not found by py2app.
-# These are six modules.
 EXTRA_MODULES = ['six.moves.BaseHTTPServer']
-
-# --------------------------- PY2APP specific configurations--------------------------------------------
-
-PY2APP_PACKAGES = ['cherrypy', 'email', 'h5py', 'IPython', 'ipykernel', 'ipykernel_launcher', 'nbformat',
-                   'lib2to3', "llvmlite", 'migrate', 'numba', 'notebook', 'numpy', 'pkg_resources',
-                   'PyObjCTools', 'scipy', 'sklearn', 'tables', 'tornado', 'tvb']
-
-PY2APP_INCLUDES = ['allensdk', 'cfflib', 'cmath', 'contextlib', 'formencode', 'gdist',
-                   'jinja2', 'jinja2.ext', 'jsonschema',
-                   'logging.config', 'markupsafe', 'matplotlib', 'mpl_toolkits.axes_grid', 'nibabel',
-                   'numexpr', 'os', 'pandas._libs.skiplist', 'psycopg2',
-                   'pygments.formatters.html', 'pygments.lexers.python', 'runpy', 'sqlite3', 'sqlalchemy',
-                   'sqlalchemy.dialects.sqlite', 'sqlalchemy.dialects.postgresql', 'sqlalchemy.sql.default_comparator',
-                   'simplejson', 'six', 'StringIO', 'xml.dom', 'xml.dom.minidom', 'zlib', 'zmq']
-
-PY2APP_EXCLUDES = ['_markerlib', 'altgraph', 'coverage', 'cython', 'Cython', 'tvb_data', 'docutils',
-                   'macholib', 'modulegraph', 'nose', 'OpenGL', 'py2app', 'PyOpenGL', 'PyQt4',
-                   'sphinx', 'test', 'testpath', 'wx']
-
-PY2APP_OPTIONS = {'iconfile': 'tvb_build/icon.icns',
-                  'plist': 'tvb_build/info.plist',
-                  'packages': PY2APP_PACKAGES,
-                  'includes': PY2APP_INCLUDES,
-                  'frameworks': ['Tcl', 'Tk'],
-                  'resources': [],
-                  'excludes': PY2APP_EXCLUDES,
-                  'argv_emulation': True,
-                  'strip': True,  # TRUE is the default
-                  'optimize': '0'}
-
 
 # --------------------------- Start defining functions: --------------------------------------------
 
@@ -276,7 +244,7 @@ def _generate_distribution(final_name, library_path, version, extra_licensing_ch
 
 
 def prepare_py2app_dist():
-    print("Running pre-py2app:")
+    print("Running pre creating app operations:")
     print(" - Cleaning old builds")
 
     if os.path.exists('build'):
@@ -296,30 +264,9 @@ def prepare_py2app_dist():
     # bin dir is initially empty, step1 does not support empty dirs in the zip
     os.mkdir(os.path.join(DIST_FOLDER, 'bin'))
 
-    print("PY2APP starting ...")
-    # Log everything from py2app in a log file
-    real_stdout, real_stderr = sys.stdout, sys.stderr
-    sys.stdout = open('PY2APP.log', 'w')
-    sys.stderr = open('PY2APP_ERR.log', 'w')
+    create_app()
 
-    fw_name = "framework_tvb"
-
-    setuptools.setup(name="tvb",
-                     version=VERSION,
-                     packages=setuptools.find_packages(fw_name),
-                     package_dir={'': fw_name},
-                     license="GPL-3.0-or-later",
-                     options={'py2app': PY2APP_OPTIONS},
-                     include_package_data=True,
-                     extras_require={'postgres': ["psycopg2"]},
-                     app=['tvb_bin/tvb_bin/app.py'],
-                     setup_requires=['py2app'])
-
-    sys.stdout = real_stdout
-    sys.stderr = real_stderr
-    print("PY2APP finished.")
-
-    print("Running post-py2app build operations:")
+    print("Running post creating app operations:")
     print("- Start creating startup scripts...")
 
     _create_command_file(os.path.join(DIST_FOLDER, "bin", 'distribution'),
@@ -334,7 +281,7 @@ def prepare_py2app_dist():
     jupyter_command = 'export PYTHONPATH=../tvb.app/Contents/Resources/lib/' + Environment.PYTHON_FOLDER + ':' \
                       '../tvb.app/Contents/Resources/lib/' + Environment.PYTHON_FOLDER + '/site-packages.zip:' \
                       '../tvb.app/Contents/Resources/lib/' + Environment.PYTHON_FOLDER + '/lib-dynload\n' \
-                      '../tvb.app/Contents/MacOS/python -m tvb_bin.run_jupyter notebook '
+                      '../tvb.app/Contents/Resources/bin/python -m tvb_bin.run_jupyter notebook '
     _create_command_file(os.path.join(DIST_FOLDER, "bin", 'jupyter_notebook'),
                          jupyter_command + '../demo_scripts', 'Launching IPython Notebook from TVB Distribution')
 
