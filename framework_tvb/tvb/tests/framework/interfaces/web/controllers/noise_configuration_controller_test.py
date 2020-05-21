@@ -43,6 +43,10 @@ from tvb.simulator.integrators import EulerStochastic, HeunStochastic
 
 class TestNoiseConfigurationController(BaseTransactionalControllerTest):
 
+    def transactional_teardown_method(self):
+        """ Cleans the testing environment """
+        self.cleanup()
+
     def test_submit_noise_configuration_happy(self, connectivity_factory):
         """
         Submit noise configuration writes the noise array on the required key in the burst configuration
@@ -66,4 +70,3 @@ class TestNoiseConfigurationController(BaseTransactionalControllerTest):
         actual_noise_arr = simulator.integrator.noise.nsig
         assert (expected_noise_arr == actual_noise_arr).all()
 
-        self.cleanup()
