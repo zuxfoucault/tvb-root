@@ -29,7 +29,6 @@
 #
 
 from os import path
-from uuid import UUID
 from mock import patch
 import numpy
 import tvb_data.surfaceData
@@ -72,13 +71,18 @@ class TestSimulationController(BaseTransactionalControllerTest):
         connectivity = TestFactory.import_zip_connectivity(self.test_user, self.test_project)
 
         self.session_stored_simulator = SimulatorAdapterModel()
-        self.session_stored_simulator.connectivity = UUID(connectivity.gid)
+        self.session_stored_simulator.connectivity = connectivity.gid
 
         self.sess_mock = RamSession()
         self.sess_mock[KEY_USER] = self.test_user
         self.sess_mock[KEY_PROJECT] = self.test_project
 
         cherrypy.request.method = "POST"
+
+    def transactional_teardown_method(self):
+        self.cleanup()
+        # Call cleanup as async ops are being called
+        self.clean_database()
 
     def test_set_connectivity(self):
         zip_path = path.join(path.dirname(tvb_data.__file__), 'connectivity', 'connectivity_66.zip')
@@ -169,7 +173,7 @@ class TestSimulationController(BaseTransactionalControllerTest):
 
         region_stimulus_creator = RegionStimulusCreator()
         view_model = region_stimulus_creator.get_view_model_class()()
-        view_model.connectivity = UUID(connectivity_index.gid)
+        view_model.connectivity = connectivity_index.gid
         view_model.weight = weight_array
         view_model.temporal = TemporalApplicableEquation()
         view_model.temporal.parameters['a'] = 1.0
@@ -179,7 +183,7 @@ class TestSimulationController(BaseTransactionalControllerTest):
                                      view_model=view_model)
         region_stimulus_index = TestFactory.get_entity(self.test_project, StimuliRegionIndex)
 
-        self.sess_mock['region_stimuli'] = UUID(region_stimulus_index.gid)
+        self.sess_mock['region_stimuli'] = region_stimulus_index.gid
 
         with patch('cherrypy.session', self.sess_mock, create=True):
             common.add2session(common.KEY_SIMULATOR_CONFIG, self.session_stored_simulator)
