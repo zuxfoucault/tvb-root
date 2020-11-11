@@ -31,7 +31,7 @@
 """
 Example of launching a simulation and an analyzer from within the REST client API.
 """
-
+from keycloak import KeycloakOpenID
 from tvb.adapters.analyzers.fourier_adapter import FFTAdapterModel, FourierAdapter
 from tvb.adapters.datatypes.db.connectivity import ConnectivityIndex
 from tvb.adapters.datatypes.h5.time_series_h5 import TimeSeriesH5
@@ -157,9 +157,10 @@ def quick_launch_an_operation(tvb_client_instance, project_gid, datatype_gid):
 
 if __name__ == '__main__':
     logger.info("Preparing client...")
-    tvb_client = TVBClient(compute_rest_url())
+    tvb_client = TVBClient("http://localhost:9090")
 
     logger.info("Attempt to login")
-    tvb_client.browser_login()
+    keycloak_instance = KeycloakOpenID("https://keycloak.codemart.ro/auth/", "TVB", "tvb-tests")
+    tvb_client._update_token(keycloak_instance.token("nest_test", "pass"))
     project_gid, time_series_gid = fire_simulation_example(tvb_client)
     quick_launch_an_operation(tvb_client, project_gid, time_series_gid)

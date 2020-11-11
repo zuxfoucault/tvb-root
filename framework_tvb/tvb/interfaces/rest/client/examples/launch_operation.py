@@ -33,7 +33,7 @@ Example of using TVB importers from within the REST client API.
 Here, we upload two independent datatypes: a connectivity and a surface from ZIP formats.
 Then, we upload a region mapping that depends on both connectivity and surface to exist in TVB storage.
 """
-
+from keycloak import KeycloakOpenID
 from tvb.adapters.analyzers.bct_adapters import BaseBCTModel
 from tvb.adapters.analyzers.bct_degree_adapters import Degree
 from tvb.adapters.uploaders.region_mapping_importer import RegionMappingImporterModel, RegionMappingImporter
@@ -126,8 +126,9 @@ def launch_operation_examples(tvb_client_instance):
 
 if __name__ == '__main__':
     logger.info("Preparing client...")
-    tvb_client = TVBClient(compute_rest_url())
+    tvb_client = TVBClient("http://localhost:9090")
 
-    logger.info("Attempt to login")
-    tvb_client.browser_login()
+    logger.info("Login client")
+    keycloak_instance = KeycloakOpenID("https://keycloak.codemart.ro/auth/", "TVB", "tvb-tests")
+    tvb_client._update_token(keycloak_instance.token("nest_test", "pass"))
     launch_operation_examples(tvb_client)
