@@ -230,27 +230,30 @@ class ImportService(object):
         count = 0
         for dt_path, datatype in sorted_dts:
             datatype_already_in_tvb = dao.get_datatype_by_gid(datatype.gid)
+            existent_dt_operation = None
             if not datatype_already_in_tvb:
                 self.store_datatype(datatype, dt_path)
                 count += 1
             else:
+                existent_dt_operation = dao.try_get_operation_by_id(datatype_already_in_tvb.id)
                 AlgorithmService.create_link([datatype_already_in_tvb.id], project.id)
 
-            file_path = h5.h5_file_for_index(datatype).path
-            h5_class = H5File.h5_class_from_file(file_path)
-            reference_list = h5_class(file_path).gather_references()
+            if existent_dt_operation and existent_dt_operation.fk_launched_in != project.id:
+                file_path = h5.h5_file_for_index(datatype).path
+                h5_class = H5File.h5_class_from_file(file_path)
+                reference_list = h5_class(file_path).gather_references()
 
-            for _, reference_gid in reference_list:
-                if not reference_gid:
-                    continue
+                for _, reference_gid in reference_list:
+                    if not reference_gid:
+                        continue
 
-                ref_index = dao.get_datatype_by_gid(reference_gid.hex)
-                if ref_index is None:
-                    os.remove(file_path)
-                    dao.remove_entity(datatype.__class__, datatype.id)
-                    raise MissingReferenceException(
-                        'Imported file depends on datatypes that do not exist. Please upload '
-                        'those first!')
+                    ref_index = dao.get_datatype_by_gid(reference_gid.hex)
+                    if ref_index is None:
+                        os.remove(file_path)
+                        dao.remove_entity(datatype.__class__, datatype.id)
+                        raise MissingReferenceException(
+                            'Imported file depends on datatypes that do not exist. Please upload '
+                            'those first!')
 
         return count
 
