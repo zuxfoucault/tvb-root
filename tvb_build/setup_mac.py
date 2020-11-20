@@ -56,7 +56,7 @@ TVB_ROOT = os.path.dirname(os.path.dirname(__file__))
 DIST_FOLDER = os.path.join(TVB_ROOT, "dist")
 DIST_FOLDER_FINAL = "TVB_Distribution"
 STEP1_RESULT = os.path.join(TVB_ROOT, "tvb_build", "build", "TVB_build_step1.zip")
-
+APP = APP_NAME + u'.app'
 FW_FOLDER = os.path.join(TVB_ROOT, "framework_tvb")
 VERSION = TvbProfile.current.version.BASE_VERSION
 
@@ -218,7 +218,7 @@ def _generate_distribution(final_name, library_path, version, extra_licensing_ch
     os.rename(DIST_FOLDER, DIST_FOLDER_FINAL)
     shutil.rmtree('tvb.egg-info', True)
     shutil.rmtree('build', True)
-    shutil.rmtree(os.path.join(DIST_FOLDER, APP_NAME), True)
+    shutil.rmtree(os.path.join(DIST_FOLDER, APP), True)
     for file_zip in glob('*.zip'):
         os.unlink(file_zip)
 
@@ -273,7 +273,7 @@ def prepare_mac_dist():
     print("- Start creating startup scripts...")
 
     _create_command_file(os.path.join(DIST_FOLDER, "bin", 'distribution'),
-                         '/Applications/{}/Contents/MacOS/tvb $@'.format(APP_NAME), '')
+                         '/Applications/{}/Contents/MacOS/tvb $@'.format(APP), '')
     _create_command_file(os.path.join(DIST_FOLDER, "bin", 'tvb_start'),
                          'source ./distribution.command start', 'Starting TVB Web Interface')
     _create_command_file(os.path.join(DIST_FOLDER, "bin", 'tvb_clean'),
@@ -281,17 +281,17 @@ def prepare_mac_dist():
     _create_command_file(os.path.join(DIST_FOLDER, "bin", 'tvb_stop'),
                          'source ./distribution.command stop', 'Stopping TVB related processes.', True)
 
-    jupyter_command = '/Applications/{}/Contents/Resources/bin/jupyter notebook '.format(APP_NAME)
+    jupyter_command = '/Applications/{}/Contents/Resources/bin/jupyter notebook '.format(APP)
     _create_command_file(os.path.join(DIST_FOLDER, "bin", 'jupyter_notebook'),
                          jupyter_command + '../demo_scripts', 'Launching IPython Notebook from TVB Distribution')
 
     # py2app should have a --exclude-dynamic parameter but it doesn't seem to work until now
     for entry in EXCLUDED_DYNAMIC_LIBS:
-        path = os.path.join(DIST_FOLDER, APP_NAME, "Contents", "Frameworks", entry)
+        path = os.path.join(DIST_FOLDER, APP, "Contents", "Frameworks", entry)
         if os.path.exists(path):
             os.remove(path)
 
-    destination_sources = os.path.join(APP_NAME, "Contents", "Resources", "lib", Environment.PYTHON_FOLDER)
+    destination_sources = os.path.join(APP, "Contents", "Resources", "lib", Environment.PYTHON_FOLDER)
     _generate_distribution("TVB_MacOS", destination_sources, VERSION)
 
     # cleanup after install
