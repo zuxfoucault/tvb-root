@@ -23,10 +23,10 @@ logger = logging.getLogger()
 # General settings applicable to all apps
 # ===============================================================================
 TVB_ROOT = os.path.dirname(os.path.dirname(__file__))
-# Name of the app
-APP_NAME = "tvb"
 # The short version string
 VERSION = TvbProfile.current.version.BASE_VERSION
+# Name of the app
+APP_NAME = "tvb-{}".format(VERSION)
 # The website in reversered order (domain first, etc.)
 IDENTIFIER = "org.thevirtualbrain"
 # The author of this package
@@ -388,6 +388,7 @@ def create_dmg():
 
     # Clean up!
     os.remove(dmgbuild_config_file)
+    os.remove(APP_FILE)
 
 
 def write_vars_to_file(file_path, var_dict):

@@ -45,7 +45,7 @@ import tvb_bin
 from glob import glob
 from zipfile import ZipFile, ZIP_DEFLATED
 
-from conda_env_to_app import create_app, create_dmg
+from conda_env_to_app import create_app, create_dmg, APP_NAME
 from tvb.basic.profile import TvbProfile
 from tvb.basic.config.environment import Environment
 from tvb_build.third_party_licenses.build_licenses import generate_artefact
@@ -243,7 +243,7 @@ def _generate_distribution(final_name, library_path, version, extra_licensing_ch
     print('- Finish creation of distribution ZIP')
 
 
-def prepare_py2app_dist():
+def prepare_mac_dist():
     print("Running pre creating app operations:")
     print(" - Cleaning old builds")
 
@@ -271,7 +271,7 @@ def prepare_py2app_dist():
     print("- Start creating startup scripts...")
 
     _create_command_file(os.path.join(DIST_FOLDER, "bin", 'distribution'),
-                         '../tvb.app/Contents/MacOS/tvb $@', '')
+                         '/Applications/{}/Contents/MacOS/tvb $@'.format(APP_NAME), '')
     _create_command_file(os.path.join(DIST_FOLDER, "bin", 'tvb_start'),
                          'source ./distribution.command start', 'Starting TVB Web Interface')
     _create_command_file(os.path.join(DIST_FOLDER, "bin", 'tvb_clean'),
@@ -279,10 +279,7 @@ def prepare_py2app_dist():
     _create_command_file(os.path.join(DIST_FOLDER, "bin", 'tvb_stop'),
                          'source ./distribution.command stop', 'Stopping TVB related processes.', True)
 
-    jupyter_command = 'export PYTHONPATH=../tvb.app/Contents/Resources/lib/' + Environment.PYTHON_FOLDER + ':' \
-                      '../tvb.app/Contents/Resources/lib/' + Environment.PYTHON_FOLDER + '/site-packages.zip:' \
-                      '../tvb.app/Contents/Resources/lib/' + Environment.PYTHON_FOLDER + '/lib-dynload\n' \
-                      '../tvb.app/Contents/Resources/bin/python -m tvb_bin.run_jupyter notebook '
+    jupyter_command = '/Applications/{}/Contents/Resources/bin/jupyter notebook '.format(APP_NAME)
     _create_command_file(os.path.join(DIST_FOLDER, "bin", 'jupyter_notebook'),
                          jupyter_command + '../demo_scripts', 'Launching IPython Notebook from TVB Distribution')
 
@@ -300,4 +297,4 @@ def prepare_py2app_dist():
 
 
 if __name__ == '__main__':
-    prepare_py2app_dist()
+    prepare_mac_dist()
