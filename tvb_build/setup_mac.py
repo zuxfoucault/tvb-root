@@ -45,7 +45,7 @@ import tvb_bin
 from glob import glob
 from zipfile import ZipFile, ZIP_DEFLATED
 
-from conda_env_to_app import create_app
+from conda_env_to_app import create_app, create_dmg
 from tvb.basic.profile import TvbProfile
 from tvb.basic.config.environment import Environment
 from tvb_build.third_party_licenses.build_licenses import generate_artefact
@@ -265,6 +265,7 @@ def prepare_py2app_dist():
     os.mkdir(os.path.join(DIST_FOLDER, 'bin'))
 
     create_app()
+    create_dmg()
 
     print("Running post creating app operations:")
     print("- Start creating startup scripts...")
