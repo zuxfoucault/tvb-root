@@ -213,7 +213,6 @@ def _generate_distribution(final_name, library_path, version, extra_licensing_ch
     create_dmg()
 
     print("- Cleaning up non-required files...")
-    shutil.rmtree(APP_FILE)
     _clean_up(DIST_FOLDER, False)
     if os.path.exists(DIST_FOLDER_FINAL):
         shutil.rmtree(DIST_FOLDER_FINAL)
@@ -240,6 +239,8 @@ def _generate_distribution(final_name, library_path, version, extra_licensing_ch
     zip_name = final_name + "_" + version + ".zip"
     if os.path.exists(zip_name):
         os.remove(zip_name)
+    if os.path.exists(os.path.join(final_name, APP)):
+        shutil.rmtree(os.path.join(final_name, APP))
     _zipdir(final_name, zip_name)
     if os.path.exists(final_name):
         shutil.rmtree(final_name)
