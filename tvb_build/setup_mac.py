@@ -213,13 +213,13 @@ def _generate_distribution(final_name, library_path, version, extra_licensing_ch
     create_dmg()
 
     print("- Cleaning up non-required files...")
+    shutil.rmtree(APP_FILE)
     _clean_up(DIST_FOLDER, False)
     if os.path.exists(DIST_FOLDER_FINAL):
         shutil.rmtree(DIST_FOLDER_FINAL)
     os.rename(DIST_FOLDER, DIST_FOLDER_FINAL)
     shutil.rmtree('tvb.egg-info', True)
     shutil.rmtree('build', True)
-    os.remove(APP_FILE)
     for file_zip in glob('*.zip'):
         os.unlink(file_zip)
 
