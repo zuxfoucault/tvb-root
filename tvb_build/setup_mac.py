@@ -45,7 +45,7 @@ import tvb_bin
 from glob import glob
 from zipfile import ZipFile, ZIP_DEFLATED
 
-from conda_env_to_app import create_app, create_dmg, APP_NAME
+from conda_env_to_app import create_app, create_dmg, APP_NAME, APP_FILE
 from tvb.basic.profile import TvbProfile
 from tvb.basic.config.environment import Environment
 from tvb_build.third_party_licenses.build_licenses import generate_artefact
@@ -210,6 +210,7 @@ def _generate_distribution(final_name, library_path, version, extra_licensing_ch
     online_help_dst = os.path.join(library_abs_path, "tvb", "interfaces", "web", "static", "help")
     print("- Moving " + online_help_src + " to " + online_help_dst)
     os.rename(online_help_src, online_help_dst)
+    create_dmg()
 
     print("- Cleaning up non-required files...")
     _clean_up(DIST_FOLDER, False)
@@ -218,7 +219,7 @@ def _generate_distribution(final_name, library_path, version, extra_licensing_ch
     os.rename(DIST_FOLDER, DIST_FOLDER_FINAL)
     shutil.rmtree('tvb.egg-info', True)
     shutil.rmtree('build', True)
-    shutil.rmtree(os.path.join(DIST_FOLDER, APP), True)
+    os.remove(APP_FILE)
     for file_zip in glob('*.zip'):
         os.unlink(file_zip)
 
@@ -267,7 +268,6 @@ def prepare_mac_dist():
     os.mkdir(os.path.join(DIST_FOLDER, 'bin'))
 
     create_app()
-    create_dmg()
 
     print("Running post creating app operations:")
     print("- Start creating startup scripts...")
