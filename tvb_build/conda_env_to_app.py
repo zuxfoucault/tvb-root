@@ -1,14 +1,17 @@
 import fileinput
 import glob
+import json
 import logging
 import os
 import re
 import shutil
 import stat
+import subprocess
 import sys
 import time
 
 import biplist
+import dmgbuild
 import magic
 from tvb.basic.profile import TvbProfile
 
@@ -108,6 +111,23 @@ MACOS_DIR = os.path.join(APP_FILE, u'Contents/MacOS')
 RESOURCE_DIR = os.path.join(APP_FILE, u'Contents/Resources')
 # Execution script in app
 APP_SCRIPT = os.path.join(MACOS_DIR, APP_NAME)
+
+# ===== Settings specific to dmgbuild =====
+# DMG format
+DMG_FORMAT = 'UDZO'
+# Locations of shortcuts in DMG window
+DMG_ICON_LOCATIONS = {
+    APP_NAME + '.app': (5, 452),
+    'Applications': (200, 450)
+}
+# Size of DMG window when mounted
+DMG_WINDOW_RECT = ((300, 200), (358, 570))
+# Size of icons in DMG
+DMG_ICON_SIZE = 80
+
+
+def extra():
+    fix_paths()
 
 
 def find_and_replace(path, search, replace, exclusions=None):
@@ -267,7 +287,7 @@ def copy_icon():
     try:
         shutil.copy(ICON_PATH, os.path.join(RESOURCE_DIR, ICON_FILE))
     except OSError as e:
-        logger("Error copying icon file from {}: {}".format(ICON_PATH))
+        logger("Error copying icon file from: {}".format(ICON_PATH))
 
 
 def create_plist():
@@ -316,5 +336,83 @@ def create_plist():
                                                      'Info.plist'), binary=False)
 
 
+def create_dmg():
+    """ Create a dmg of the app """
+
+    # Check if app to exists
+    if not os.path.isdir(APP_FILE):
+        logger.error("Could not find app file at {}".format(APP_FILE))
+        sys.exit(1)
+
+    DMG_FILE = os.path.join(OUTPUT_FOLDER, APP_NAME + u'.dmg')
+
+    if os.path.exists(DMG_FILE):
+        os.remove(DMG_FILE)
+
+    print("\n+++++++++++++++++++++ Creating DMG from app +++++++++++++++++++++++")
+
+    # Get file size of APP
+    APP_SIZE = subprocess.check_output(
+        ['du', '-sh', APP_FILE]).split()[0].decode('utf-8')
+    # returns tuple with format ('3.0', 'G')
+    (size, unit) = re.findall('(\d+\.?\d?)(\w)', APP_SIZE)[0]
+
+    # Add a bit of extra to the disk image size
+    APP_SIZE = str(float(size) * 1.25) + unit
+
+    print("Creating disk image of {}".format(APP_SIZE))
+
+    # Create a dmgbuild config file in same folder as
+    dmgbuild_config_file = os.path.join(os.getcwd(),
+                                        'dmgbuild_settings.py')
+
+    dmg_config = {
+        'filename': DMG_FILE,
+        'volume_name': APP_NAME,
+        'size': APP_SIZE,
+        'files': [APP_FILE],
+        'symlinks': {'Applications': '/Applications'},
+    }
+
+    if ICON_FILE:
+        dmg_config['badge_icon'] = ICON_PATH
+    dmg_config['format'] = DMG_FORMAT
+    dmg_config['icon_size'] = DMG_ICON_SIZE
+    dmg_config['icon_locations'] = DMG_ICON_LOCATIONS
+    dmg_config['window_rect'] = DMG_WINDOW_RECT
+
+    write_vars_to_file(dmgbuild_config_file, dmg_config)
+    print("Copying files to DMG and compressing it. Please wait.")
+    dmgbuild.build_dmg(DMG_FILE, APP_NAME, settings_file=dmgbuild_config_file)
+
+    # Clean up!
+    os.remove(dmgbuild_config_file)
+
+
+def write_vars_to_file(file_path, var_dict):
+    with open(file_path, 'w') as fp:
+        fp.write("# -*- coding: utf-8 -*-\n")
+        fp.write("from __future__ import unicode_literals\n\n")
+
+        for var, value in var_dict.items():
+            if isinstance(value, six.string_types):
+                fp.write('{} = "{}"\n'.format(var, value))
+            else:
+                fp.write('{} = {}\n'.format(var, value))
+
+
+def fix_paths():
+    kernel_json = os.path.join(
+        RESOURCE_DIR, 'share', 'jupyter', 'kernels', 'python3', 'kernel.json')
+    if os.path.exists(kernel_json):
+        print('Fixing kernel.json')
+        with open(kernel_json, 'r') as fp:
+            kernelCfg = json.load(fp)
+            kernelCfg['argv'][0] = 'python'
+        with open(kernel_json, 'w+') as fp:
+            json.dump(kernelCfg, fp)
+
+
 if __name__ == "__main__":
     create_app()
+    create_dmg()

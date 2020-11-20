@@ -15,3 +15,4 @@ conda install -y --name mac-distribution -c conda-forge jupyterlab flask gevent 
 /WORK/anaconda3/anaconda3/envs/mac-distribution/bin/pip install biplist six
 /WORK/anaconda3/anaconda3/envs/mac-distribution/bin/pip uninstall python-magic
 /WORK/anaconda3/anaconda3/envs/mac-distribution/bin/pip install python-magic-bin==0.4.14
+/WORK/anaconda3/anaconda3/envs/mac-distribution/bin/pip install dmgbuild
