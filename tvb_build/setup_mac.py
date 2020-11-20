@@ -218,8 +218,10 @@ def _generate_distribution(final_name, library_path, version, extra_licensing_ch
     os.rename(DIST_FOLDER, DIST_FOLDER_FINAL)
     shutil.rmtree('tvb.egg-info', True)
     shutil.rmtree('build', True)
+    shutil.rmtree(os.path.join(DIST_FOLDER, APP_NAME), True)
     for file_zip in glob('*.zip'):
         os.unlink(file_zip)
+
 
     print("- Creating required folder structure...")
     if os.path.exists(final_name):
@@ -285,11 +287,11 @@ def prepare_mac_dist():
 
     # py2app should have a --exclude-dynamic parameter but it doesn't seem to work until now
     for entry in EXCLUDED_DYNAMIC_LIBS:
-        path = os.path.join(DIST_FOLDER, "tvb.app", "Contents", "Frameworks", entry)
+        path = os.path.join(DIST_FOLDER, APP_NAME, "Contents", "Frameworks", entry)
         if os.path.exists(path):
             os.remove(path)
 
-    destination_sources = os.path.join("tvb.app", "Contents", "Resources", "lib", Environment.PYTHON_FOLDER)
+    destination_sources = os.path.join(APP_NAME, "Contents", "Resources", "lib", Environment.PYTHON_FOLDER)
     _generate_distribution("TVB_MacOS", destination_sources, VERSION)
 
     # cleanup after install

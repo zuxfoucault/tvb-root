@@ -388,7 +388,6 @@ def create_dmg():
 
     # Clean up!
     os.remove(dmgbuild_config_file)
-    os.remove(APP_FILE)
 
 
 def write_vars_to_file(file_path, var_dict):
