@@ -235,12 +235,13 @@ def _generate_distribution(final_name, library_path, version, extra_licensing_ch
             extra_licensing_check[idx] = os.path.join(final_name, DIST_FOLDER_FINAL, extra_licensing_check[idx])
     _introspect_licenses(os.path.join(final_name, DIST_FOLDER_FINAL, 'THIRD_PARTY_LICENSES'),
                          os.path.join(final_name, DIST_FOLDER_FINAL, library_path), extra_licensing_check)
+    print("- Deleting {}. We will use it from the DMG volume.".format(APP_NAME))
+    if os.path.exists(os.path.join(final_name,DIST_FOLDER_FINAL, APP)):
+        shutil.rmtree(os.path.join(final_name,DIST_FOLDER_FINAL, APP))
     print("- Creating the ZIP folder of the distribution...")
     zip_name = final_name + "_" + version + ".zip"
     if os.path.exists(zip_name):
         os.remove(zip_name)
-    if os.path.exists(os.path.join(final_name, APP)):
-        shutil.rmtree(os.path.join(final_name, APP))
     _zipdir(final_name, zip_name)
     if os.path.exists(final_name):
         shutil.rmtree(final_name)
