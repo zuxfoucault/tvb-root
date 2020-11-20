@@ -13,6 +13,7 @@ import time
 import biplist
 import dmgbuild
 import magic
+import six
 from tvb.basic.profile import TvbProfile
 
 logging.basicConfig(stream=sys.stdout, level=logging.WARNING)
