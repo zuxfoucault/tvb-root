@@ -50,7 +50,6 @@ from tvb.basic.profile import TvbProfile
 from tvb.basic.config.environment import Environment
 from tvb_build.third_party_licenses.build_licenses import generate_artefact
 
-
 BIN_FOLDER = os.path.dirname(tvb_bin.__file__)
 TVB_ROOT = os.path.dirname(os.path.dirname(__file__))
 DIST_FOLDER = os.path.join(TVB_ROOT, "dist")
@@ -65,6 +64,7 @@ FILES_TO_DELETE = ['.DS_Store', 'dev_logger_config.conf']
 EXCLUDED_DYNAMIC_LIBS = []
 
 EXTRA_MODULES = ['six.moves.BaseHTTPServer']
+
 
 # --------------------------- Start defining functions: --------------------------------------------
 
@@ -222,7 +222,6 @@ def _generate_distribution(final_name, library_path, version, extra_licensing_ch
     for file_zip in glob('*.zip'):
         os.unlink(file_zip)
 
-
     print("- Creating required folder structure...")
     if os.path.exists(final_name):
         shutil.rmtree(final_name)
@@ -236,8 +235,8 @@ def _generate_distribution(final_name, library_path, version, extra_licensing_ch
     _introspect_licenses(os.path.join(final_name, DIST_FOLDER_FINAL, 'THIRD_PARTY_LICENSES'),
                          os.path.join(final_name, DIST_FOLDER_FINAL, library_path), extra_licensing_check)
     print("- Deleting {}. We will use it from the DMG volume.".format(APP_NAME))
-    if os.path.exists(os.path.join(final_name,DIST_FOLDER_FINAL, APP)):
-        shutil.rmtree(os.path.join(final_name,DIST_FOLDER_FINAL, APP))
+    if os.path.exists(os.path.join(final_name, DIST_FOLDER_FINAL, APP)):
+        shutil.rmtree(os.path.join(final_name, DIST_FOLDER_FINAL, APP))
     print("- Creating the ZIP folder of the distribution...")
     zip_name = final_name + "_" + version + ".zip"
     if os.path.exists(zip_name):
@@ -275,9 +274,12 @@ def prepare_mac_dist():
     print("- Start creating startup scripts...")
 
     _create_command_file(os.path.join(DIST_FOLDER, "bin", 'distribution'),
-                         '/Applications/{}/Contents/MacOS/tvb $@'.format(APP), '')
+                         '/Applications/{}/Contents/MacOS/{} $@'.format(APP, APP), '')
     _create_command_file(os.path.join(DIST_FOLDER, "bin", 'tvb_start'),
-                         'source ./distribution.command start', 'Starting TVB Web Interface')
+                         'rm -rf /Applications/tvb-2.0.10.app/stdout \necho "" > /Applications/tvb-2.0.10.app/stdout '
+                         '\ntail -f /Applications/tvb-2.0.10.app/stdout & \nexport TAIL_PID=$! \nopen -W -o '
+                         '/Applications/tvb-2.0.10.app/stdout /Applications/tvb-2.0.10.app \nkill $TAIL_PID',
+                         'Starting TVB Web Interface')
     _create_command_file(os.path.join(DIST_FOLDER, "bin", 'tvb_clean'),
                          'source ./distribution.command clean', 'Cleaning up old TVB data.', True)
     _create_command_file(os.path.join(DIST_FOLDER, "bin", 'tvb_stop'),
