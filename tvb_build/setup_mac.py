@@ -274,7 +274,7 @@ def prepare_mac_dist():
     print("- Start creating startup scripts...")
 
     _create_command_file(os.path.join(DIST_FOLDER, "bin", 'distribution'),
-                         '/Applications/{}/Contents/MacOS/{} $@'.format(APP, APP), '')
+                         '/Applications/{}/Contents/MacOS/{} $@'.format(APP, APP_NAME), '')
     _create_command_file(os.path.join(DIST_FOLDER, "bin", 'tvb_start'),
                          'rm -rf /Applications/tvb-2.0.10.app/stdout \necho "" > /Applications/tvb-2.0.10.app/stdout '
                          '\ntail -f /Applications/tvb-2.0.10.app/stdout & \nexport TAIL_PID=$! \nopen -W -o '
