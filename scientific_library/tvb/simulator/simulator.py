@@ -447,6 +447,8 @@ class Simulator(HasTraits):
                     shift = self.current_step % self.horizon
                     history = numpy.roll(history, -shift, axis=0)
                     if self.surface is not None:
+                        self.log.info("Averaging surface ICs to ROI ICs to obtain history")
+                        # TODO refactor, callling reference impl
                         n_reg = self.connectivity.number_of_regions
                         (nt, ns, _, nm), ax = history.shape, (2, 0, 1, 3)
                         region_initial_conditions = numpy.zeros((nt, ns, n_reg, nm))
@@ -462,9 +464,15 @@ class Simulator(HasTraits):
             self.integrator.bound_state(numpy.swapaxes(history, 0, 1))
         self.log.info('Final initial history shape is %r', history.shape)
 
-        # create initial state from history
-        self.current_state = history[self.current_step % self.horizon].copy()
-        self.log.debug('initial state has shape %r' % (self.current_state.shape, ))
+        if self.surface:
+            # ensure 4D
+            # TODO refactor to backend
+            initial_conditions = initial_conditions.reshape((-1, ) + initial_conditions.shape[-3:])
+            self.current_state = initial_conditions[-1].copy()
+        else:
+            self.current_state = history[self.current_step % self.horizon].copy()
+        self.log.info('initial state has shape %r' % (self.current_state.shape, ))
+
         if self.surface is not None and history.shape[2] > self.connectivity.number_of_regions:
             n_reg = self.connectivity.number_of_regions
             (nt, ns, _, nm), ax = history.shape, (2, 0, 1, 3)
