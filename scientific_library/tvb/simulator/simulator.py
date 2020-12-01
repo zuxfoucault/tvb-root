@@ -464,7 +464,7 @@ class Simulator(HasTraits):
             self.integrator.bound_state(numpy.swapaxes(history, 0, 1))
         self.log.info('Final initial history shape is %r', history.shape)
 
-        if self.surface:
+        if self.surface is not None and initial_conditions is not None:
             # ensure 4D
             # TODO refactor to backend
             initial_conditions = initial_conditions.reshape((-1, ) + initial_conditions.shape[-3:])
