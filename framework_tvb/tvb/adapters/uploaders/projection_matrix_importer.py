@@ -89,13 +89,16 @@ class ProjectionMatrixImporterModel(UploaderViewModel):
         doc='The Sensors used in for current projection.'
     )
 
+    def temporary_paths(self):
+        return [self.projection_file]
+
 
 class ProjectionMatrixImporterForm(ABCUploaderForm):
 
     def __init__(self):
         super(ProjectionMatrixImporterForm, self).__init__()
         self.projection_file = TraitUploadField(ProjectionMatrixImporterModel.projection_file, ('.mat', '.npy'),
-                                                'projection_file', self.temporary_files)
+                                                'projection_file')
         self.dataset_name = StrField(ProjectionMatrixImporterModel.dataset_name, name='dataset_name')
         surface_conditions = FilterChain(fields=[FilterChain.datatype + '.surface_type'], operations=['=='],
                                          values=['Cortical Surface'])

@@ -91,13 +91,15 @@ class NetworkxImporterModel(UploaderViewModel):
         label='Key Node Hemisphere'
     )
 
+    def temporary_paths(self):
+        return [self.data_file]
+
 
 class NetworkxConnectivityImporterForm(ABCUploaderForm):
 
     def __init__(self):
         super(NetworkxConnectivityImporterForm, self).__init__()
-        self.data_file = TraitUploadField(NetworkxImporterModel.data_file, '.gpickle', 'data_file',
-                                          self.temporary_files)
+        self.data_file = TraitUploadField(NetworkxImporterModel.data_file, '.gpickle', 'data_file')
         self.key_edge_weight = StrField(NetworkxImporterModel.key_edge_weight, 'key_edge_weight')
         self.key_edge_tract = StrField(NetworkxImporterModel.key_edge_tract, name='key_edge_tract')
         self.key_node_coordinates = StrField(NetworkxImporterModel.key_node_coordinates, name='key_node_coordinates')

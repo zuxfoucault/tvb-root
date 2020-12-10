@@ -50,13 +50,15 @@ from tvb.datatypes.time_series import TimeSeries
 class FooDataImporterModel(UploaderViewModel):
     array_data = Str(label='please upload npy', required=True)
 
+    def temporary_paths(self):
+        return [self.array_data]
+
 
 class FooDataImporterForm(ABCUploaderForm):
 
     def __init__(self):
         super(FooDataImporterForm, self).__init__()
-        self.array_data = TraitUploadField(FooDataImporterModel.array_data, '.npy', 'array_data',
-                                           self.temporary_files)
+        self.array_data = TraitUploadField(FooDataImporterModel.array_data, '.npy', 'array_data')
 
     @staticmethod
     def get_view_model():

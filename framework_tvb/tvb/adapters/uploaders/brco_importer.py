@@ -56,13 +56,16 @@ class BRCOImporterModel(UploaderViewModel):
         doc='The Connectivity for which these annotations were made'
     )
 
+    def temporary_paths(self):
+        return [self.data_file]
+
 
 class BRCOImporterForm(ABCUploaderForm):
 
     def __init__(self):
         super(BRCOImporterForm, self).__init__()
 
-        self.data_file = TraitUploadField(BRCOImporterModel.data_file, '.xml', 'data_file', self.temporary_files)
+        self.data_file = TraitUploadField(BRCOImporterModel.data_file, '.xml', 'data_file')
         self.connectivity = TraitDataTypeSelectField(BRCOImporterModel.connectivity, 'connectivity')
 
     @staticmethod

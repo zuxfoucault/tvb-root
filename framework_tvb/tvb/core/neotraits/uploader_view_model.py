@@ -50,3 +50,6 @@ class UploaderViewModel(ViewModel):
         label='Encrypted AES Password (if your files come encrypted)',
         doc='Check our demo notebook on how to produce this key and how we expect your files to be encrypted'
     )
+
+    def temporary_paths(self):
+        raise NotImplementedError

@@ -64,8 +64,7 @@ class ABCUploaderForm(ABCAdapterForm):
                                     and os.path.exists(TvbProfile.current.UPLOAD_KEY_PATH))
         if supports_encrypted_files:
             self.encrypted_aes_key = TraitUploadField(UploaderViewModel.encrypted_aes_key, '.pem',
-                                                      'encrypted_aes_key', self.temporary_files)
-        self.temporary_files = []
+                                                      'encrypted_aes_key')
 
     @staticmethod
     def get_required_datatype():

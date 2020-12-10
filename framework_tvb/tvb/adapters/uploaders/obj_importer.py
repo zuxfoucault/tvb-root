@@ -63,6 +63,9 @@ class ObjSurfaceImporterModel(UploaderViewModel):
         label='Center surface using vertex means along axes'
     )
 
+    def temporary_paths(self):
+        return [self.data_file]
+
 
 class ObjSurfaceImporterForm(ABCUploaderForm):
 
@@ -71,7 +74,7 @@ class ObjSurfaceImporterForm(ABCUploaderForm):
 
         self.surface_type = SelectField(ObjSurfaceImporterModel.surface_type, name='surface_type',
                                         choices=ALL_SURFACES_SELECTION)
-        self.data_file = TraitUploadField(ObjSurfaceImporterModel.data_file, '.obj', 'data_file', self.temporary_files)
+        self.data_file = TraitUploadField(ObjSurfaceImporterModel.data_file, '.obj', 'data_file')
         self.should_center = BoolField(ObjSurfaceImporterModel.should_center, name='should_center')
 
     @staticmethod

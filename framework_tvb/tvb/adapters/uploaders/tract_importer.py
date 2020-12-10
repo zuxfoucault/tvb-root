@@ -71,13 +71,16 @@ class TrackImporterModel(UploaderViewModel):
         label='Reference Volume Map'
     )
 
+    def temporary_paths(self):
+        return [self.data_file]
+
 
 class TrackImporterForm(ABCUploaderForm):
 
     def __init__(self):
         super(TrackImporterForm, self).__init__()
 
-        self.data_file = TraitUploadField(TrackImporterModel.data_file, '.trk', 'data_file', self.temporary_files)
+        self.data_file = TraitUploadField(TrackImporterModel.data_file, '.trk', 'data_file')
         self.region_volume = TraitDataTypeSelectField(TrackImporterModel.region_volume, name='region_volume')
 
     @staticmethod

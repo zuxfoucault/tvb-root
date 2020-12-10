@@ -47,6 +47,9 @@ class DummyImporterViewModel(UploaderViewModel):
         label='Dummy int scalar'
     )
 
+    def temporary_paths(self):
+        return [self.uploaded]
+
 
 def test_dummy_importer_mv_to_h5(tmph5factory):
     dummy_file_name = 'file_name.zip'
