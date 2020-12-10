@@ -117,9 +117,16 @@ class TVBImporter(ABCUploader):
                 importer_operation_id = None
                 if isinstance(view_model, TVBImporterModel):
                     importer_operation_id = current_op.id
-                operations = service.import_project_operations(current_op.project, tmp_folder, importer_operation_id)
-                shutil.rmtree(tmp_folder)
-                self.nr_of_datatypes += len(operations)
+                check_if_operations_in_db, all_operations_in_db_msg = self.check_if_operations_in_db(tmp_folder, current_op.id)
+
+                if check_if_operations_in_db:
+                    operations = service.import_project_operations(current_op.project, tmp_folder, importer_operation_id)
+                    shutil.rmtree(tmp_folder)
+                    self.nr_of_datatypes += len(operations)
+                else:
+                    op = dao.get_operation_by_id(current_op.id)
+                    op.additional_info = all_operations_in_db_msg
+                    dao.store_entity(op, True)
 
             else:
                 # upgrade file if necessary
@@ -146,3 +153,13 @@ class TVBImporter(ABCUploader):
 
         else:
             raise LaunchException("File: %s to import does not exists." % view_model.data_file)
+
+    def check_if_operations_in_db(self, import_path, importer_operation_id):
+        for root, _, files in os.walk(import_path):
+            for file in files:
+                h5_file = os.path.join(root, file)
+                dt = ImportService().load_datatype_from_file(h5_file, op_id=importer_operation_id)
+                dt_in_db = dao.get_datatype_by_gid(dt.gid)
+                if dt_in_db is None:
+                    return True, ""
+        return False, "The chosen files are already in the project."
